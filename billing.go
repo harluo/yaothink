@@ -1,4 +1,4 @@
-package echo
+package yaothink
 
 import (
 	"github.com/harluo/yaothink/internal/rpc"
