@@ -7,6 +7,7 @@ import (
 	"gitea.com/wallety/protocol/server"
 	"github.com/goexl/gox"
 	"github.com/goexl/gox/field"
+	"github.com/goexl/id"
 	"github.com/goexl/log"
 	"github.com/harluo/grpc"
 	"github.com/harluo/yaothink/internal/rpc/internal"
@@ -14,12 +15,14 @@ import (
 
 type Billing struct {
 	client server.TokenApiClient
+	id     id.Generator
 	logger log.Logger
 }
 
-func newBilling(client *grpc.Client, logger log.Logger) *Billing {
+func newBilling(client *grpc.Client, id id.Generator, logger log.Logger) *Billing {
 	return &Billing{
 		client: server.NewTokenApiClient(client.Connection(internal.NameBilling)),
+		id:     id,
 		logger: logger,
 	}
 }
@@ -28,7 +31,7 @@ func (b *Billing) Token(
 	ctx context.Context,
 	account, module uint64, model string,
 	input, completion, read, creation uint32,
-) (err error) {
+) (id uint64, err error) {
 	fields := gox.Fields[any]{
 		field.New("account", account),
 		field.New("module", module),
@@ -48,12 +51,26 @@ func (b *Billing) Token(
 	req.TokenCompletion = completion
 	req.TokenCacheRead = read
 	req.TokenCacheCreation = creation
-	if rsp, ce := b.client.RecordTokenCall(ctx, req); ce != nil {
+	if next, sie := b.setId(req); sie != nil {
+		err = sie
+	} else if rsp, ce := b.client.RecordTokenCall(ctx, req); ce != nil {
 		err = ce
 	} else if !rsp.Success {
 		b.logger.Warn("计费失败", fields[0], fields[1:]...)
 	} else {
+		id = next
 		b.logger.Info("计费成功", fields[0], fields[1:]...)
+	}
+
+	return
+}
+
+func (b *Billing) setId(req *token.TokenCallReq) (id uint64, err error) {
+	if value, ne := b.id.Next(); ne != nil {
+		err = ne
+	} else {
+		id = value.Get()
+		req.RequestId = id
 	}
 
 	return

@@ -5,6 +5,7 @@ go 1.25.0
 require (
 	gitea.com/wallety/protocol v0.0.5
 	github.com/goexl/gox v1.9.2
+	github.com/goexl/id v0.1.3
 	github.com/goexl/log v0.1.0
 	github.com/harluo/di v0.0.5
 	github.com/harluo/grpc v0.1.6
