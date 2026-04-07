@@ -32,8 +32,12 @@ func (b *Billing) Token(
 	account, module uint64, model string,
 	input, completion, read, creation uint32,
 ) (id uint64, err error) {
-	if input+completion+read+creation == 0 {
+	total := input + completion + read + creation
+	if total == 0 {
 		b.logger.Warn("无需计费", field.New("token", 0))
+	}
+	if total == 0 {
+		return
 	}
 
 	fields := gox.Fields[any]{
