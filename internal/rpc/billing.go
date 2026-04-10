@@ -34,7 +34,7 @@ func (b *Billing) Token(
 ) (id uint64, err error) {
 	total := input + completion + read + creation
 	if total == 0 {
-		b.logger.Warn("无需计费", field.New("token", 0))
+		b.logger.Debug("无需计费", field.New("token", 0))
 	}
 	if total == 0 {
 		return
@@ -67,7 +67,7 @@ func (b *Billing) Token(
 		b.logger.Warn("计费失败", fields[0], fields[1:]...)
 	} else {
 		id = next
-		b.logger.Info("计费成功", fields[0], fields[1:]...)
+		b.logger.Debug("计费成功", fields[0], fields[1:]...)
 	}
 
 	return
