@@ -10,6 +10,7 @@ import (
 	"github.com/goexl/id"
 	"github.com/goexl/log"
 	"github.com/harluo/grpc"
+	"github.com/harluo/yaothink/internal/core"
 	"github.com/harluo/yaothink/internal/rpc/internal"
 )
 
@@ -31,7 +32,8 @@ func (b *Billing) Token(
 	ctx context.Context,
 	account, module uint64, model string,
 	input, completion, read, creation uint32,
-) (id uint64, err error) {
+) (result *core.BillingResult, err error) {
+	result = new(core.BillingResult)
 	total := input + completion + read + creation
 	if total == 0 {
 		b.logger.Debug("无需计费", field.New("token", 0))
@@ -66,7 +68,9 @@ func (b *Billing) Token(
 	} else if !rsp.Success {
 		b.logger.Warn("计费失败", fields[0], fields[1:]...)
 	} else {
-		id = next
+		result.Id = next
+		result.Balance = rsp.Balance
+		result.Amount = rsp.CurrentRequestFee
 		b.logger.Debug("计费成功", fields[0], fields[1:]...)
 	}
 
