@@ -33,6 +33,7 @@ func (b *Billing) Token(
 	account, module uint64, model string,
 	input, completion, read, creation uint32,
 ) (result *core.BillingResult, err error) {
+	result = new(core.BillingResult)
 	total := input + completion + read + creation
 	if total == 0 {
 		b.logger.Debug("无需计费", field.New("token", 0))
@@ -67,7 +68,6 @@ func (b *Billing) Token(
 	} else if !rsp.Success {
 		b.logger.Warn("计费失败", fields[0], fields[1:]...)
 	} else {
-		result = new(core.BillingResult)
 		result.Id = next
 		result.Balance = rsp.Balance
 		result.Amount = rsp.CurrentRequestFee
