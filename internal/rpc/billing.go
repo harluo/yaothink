@@ -64,15 +64,24 @@ func (b *Billing) Token(
 		err = sie
 	} else if rsp, ce := b.client.RecordTokenCall(ctx, req); ce != nil {
 		err = ce
-	} else if !rsp.Success {
+	} else {
+		result = b.setResult(next, rsp, fields)
+	}
+
+	return
+}
+
+func (b *Billing) setResult(id uint64, rsp *token.TokenCallResp, fields gox.Fields[any]) (result *core.BillingResult) {
+	if !rsp.Success {
 		b.logger.Warn("计费失败", fields[0], fields[1:]...)
 	} else {
-		result = new(core.BillingResult)
-		result.Id = next
-		result.Balance = rsp.Balance
-		result.Amount = rsp.CurrentRequestFee
 		b.logger.Debug("计费成功", fields[0], fields[1:]...)
 	}
+
+	result = new(core.BillingResult)
+	result.Id = id
+	result.Success = rsp.Success
+	result.Status = rsp.BalanceStatus
 
 	return
 }
