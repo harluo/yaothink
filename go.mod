@@ -8,7 +8,7 @@ require (
 	github.com/goexl/id v0.1.3
 	github.com/goexl/log v0.1.0
 	github.com/harluo/di v0.0.5
-	github.com/harluo/grpc v0.1.6
+	github.com/harluo/grpc v0.1.7
 )
 
 require (
