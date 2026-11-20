@@ -14,21 +14,21 @@ import (
 	"github.com/harluo/yaothink/internal/rpc/internal"
 )
 
-type Billing struct {
+type Wallet struct {
 	client server.TokenApiClient
 	id     id.Generator
 	logger log.Logger
 }
 
-func newBilling(client *grpc.Client, id id.Generator, logger log.Logger) *Billing {
-	return &Billing{
+func newBilling(client *grpc.Client, id id.Generator, logger log.Logger) *Wallet {
+	return &Wallet{
 		client: server.NewTokenApiClient(client.Connection(internal.NameBilling)),
 		id:     id,
 		logger: logger,
 	}
 }
 
-func (b *Billing) Token(
+func (b *Wallet) Token(
 	ctx context.Context,
 	account, module uint64, model string,
 	input, completion, read, creation uint32,
@@ -71,7 +71,7 @@ func (b *Billing) Token(
 	return
 }
 
-func (b *Billing) setResult(id uint64, rsp *token.TokenCallResp, fields gox.Fields[any]) (result *core.BillingResult) {
+func (b *Wallet) setResult(id uint64, rsp *token.TokenCallResp, fields gox.Fields[any]) (result *core.BillingResult) {
 	if !rsp.Success {
 		b.logger.Warn("计费失败", fields[0], fields[1:]...)
 	} else {
@@ -86,7 +86,7 @@ func (b *Billing) setResult(id uint64, rsp *token.TokenCallResp, fields gox.Fiel
 	return
 }
 
-func (b *Billing) setId(req *token.TokenCallReq) (id uint64, err error) {
+func (b *Wallet) setId(req *token.TokenCallReq) (id uint64, err error) {
 	if value, ne := b.id.Next(); ne != nil {
 		err = ne
 	} else {
