@@ -1,7 +1,9 @@
 {
-    "rate": {
-        // 汇率服务配置
-        "endpoint": "http://rate-server.service/api/private/parities/singles", // 完整的汇率查询接口地址
-        "ttl": "24h", // 汇率缓存时长，必须大于零
+    "yaothink": {
+        "rate": {
+            // 汇率服务配置
+            "endpoint": "http://rate-server.service/api/private/parities/singles", // 完整的汇率查询接口地址
+            "ttl": "24h", // 汇率缓存时长，必须大于零
+        },
     },
 }

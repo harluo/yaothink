@@ -4,15 +4,13 @@ import (
 	"github.com/harluo/config"
 )
 
-// Wrapper 汇率配置包装器。
+// 组件配置包装器。
 type Wrapper struct {
-	Rate *Rate `json:"rate,omitempty" validate:"required"`
+	Yaothink Yaothink `json:"yaothink"`
 }
 
 func newWrapper(getter config.Getter) (wrapper *Wrapper, err error) {
-	wrapper = &Wrapper{
-		Rate: &Rate{Endpoint: "http://rate-server.service/api/private/parities/singles"},
-	}
+	wrapper = new(Wrapper)
 	err = getter.Get(wrapper)
 
 	return

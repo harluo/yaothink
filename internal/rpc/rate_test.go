@@ -41,7 +41,7 @@ func TestRateValue(t *testing.T) {
 	if mkdirErr := os.Mkdir("config", 0o700); mkdirErr != nil {
 		t.Fatal(mkdirErr)
 	}
-	contents := fmt.Sprintf(`{"rate":{"endpoint":%q,"ttl":"1h"}}`, server.URL+path)
+	contents := fmt.Sprintf(`{"yaothink":{"rate":{"endpoint":%q,"ttl":"1h"}}}`, server.URL+path)
 	if writeErr := os.WriteFile("config/rate.jsonc", []byte(contents), 0o600); writeErr != nil {
 		t.Fatal(writeErr)
 	}

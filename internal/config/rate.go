@@ -10,6 +10,6 @@ type Rate struct {
 	TTL      time.Duration `default:"24h" json:"ttl,omitempty" validate:"gt=0"`
 }
 
-func newRate(wrapper *Wrapper) *Rate {
-	return wrapper.Rate
+func newRate(yaothink *Yaothink) *Rate {
+	return yaothink.Rate
 }
