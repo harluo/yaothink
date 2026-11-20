@@ -20,7 +20,7 @@ type Wallet struct {
 	logger log.Logger
 }
 
-func newBilling(client *grpc.Client, id id.Generator, logger log.Logger) *Wallet {
+func newWallet(client *grpc.Client, id id.Generator, logger log.Logger) *Wallet {
 	return &Wallet{
 		client: server.NewTokenApiClient(client.Connection(internal.NameBilling)),
 		id:     id,
@@ -28,14 +28,14 @@ func newBilling(client *grpc.Client, id id.Generator, logger log.Logger) *Wallet
 	}
 }
 
-func (b *Wallet) Token(
+func (w *Wallet) Token(
 	ctx context.Context,
 	account, module uint64, model string,
 	input, completion, read, creation uint32,
 ) (result *core.BillingResult, err error) {
 	total := input + completion + read + creation
 	if total == 0 {
-		b.logger.Debug("无需计费", field.New("token", 0))
+		w.logger.Debug("无需计费", field.New("token", 0))
 	}
 	if total == 0 {
 		return
@@ -50,7 +50,7 @@ func (b *Wallet) Token(
 		field.New("read", read),
 		field.New("creation", creation),
 	}
-	b.logger.Debug("开始计费", fields[0], fields[1:]...)
+	w.logger.Debug("开始计费", fields[0], fields[1:]...)
 
 	req := new(token.TokenCallReq)
 	req.Account = account
@@ -60,22 +60,22 @@ func (b *Wallet) Token(
 	req.TokenCompletion = completion
 	req.TokenCacheRead = read
 	req.TokenCacheCreation = creation
-	if next, sie := b.setId(req); sie != nil {
+	if next, sie := w.setId(req); sie != nil {
 		err = sie
-	} else if rsp, ce := b.client.RecordTokenCall(ctx, req); ce != nil {
+	} else if rsp, ce := w.client.RecordTokenCall(ctx, req); ce != nil {
 		err = ce
 	} else {
-		result = b.setResult(next, rsp, fields)
+		result = w.setResult(next, rsp, fields)
 	}
 
 	return
 }
 
-func (b *Wallet) setResult(id uint64, rsp *token.TokenCallResp, fields gox.Fields[any]) (result *core.BillingResult) {
+func (w *Wallet) setResult(id uint64, rsp *token.TokenCallResp, fields gox.Fields[any]) (result *core.BillingResult) {
 	if !rsp.Success {
-		b.logger.Warn("计费失败", fields[0], fields[1:]...)
+		w.logger.Warn("计费失败", fields[0], fields[1:]...)
 	} else {
-		b.logger.Debug("计费成功", fields[0], fields[1:]...)
+		w.logger.Debug("计费成功", fields[0], fields[1:]...)
 	}
 
 	result = new(core.BillingResult)
@@ -86,8 +86,8 @@ func (b *Wallet) setResult(id uint64, rsp *token.TokenCallResp, fields gox.Field
 	return
 }
 
-func (b *Wallet) setId(req *token.TokenCallReq) (id uint64, err error) {
-	if value, ne := b.id.Next(); ne != nil {
+func (w *Wallet) setId(req *token.TokenCallReq) (id uint64, err error) {
+	if value, ne := w.id.Next(); ne != nil {
 		err = ne
 	} else {
 		id = value.Get()

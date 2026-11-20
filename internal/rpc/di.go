@@ -6,6 +6,6 @@ import (
 
 func init() {
 	di.New().Instance().Put(
-		newBilling,
+		newWallet,
 	).Build().Apply()
 }
