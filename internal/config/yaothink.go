@@ -5,6 +5,6 @@ type Yaothink struct {
 	Rate *Rate `json:"rate,omitempty" validate:"required"`
 }
 
-func newYaothink(wrapper *Wrapper) *Yaothink{
+func newYaothink(wrapper *Wrapper) *Yaothink {
 	return &wrapper.Yaothink
 }

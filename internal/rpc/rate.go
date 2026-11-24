@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"context"
-
 	"sync"
 	"time"
 
@@ -30,8 +29,8 @@ func newRate(settings *config.Rate, client *http.Client) *Rate {
 	}
 }
 
-// 返回源币种到目标币种的汇率，以一百万为基数。
-func (r *Rate) Value(ctx context.Context, from, to core.Currency) (value uint64, err error) {
+// 返回源币种到目标币种的汇率。
+func (r *Rate) Value(ctx context.Context, from, to core.Currency) (value float64, err error) {
 	key := [2]core.Currency{from, to}
 	if from.String() == "" || to.String() == "" {
 		err = exception.New().Message("无效的币种").Build()
@@ -44,7 +43,7 @@ func (r *Rate) Value(ctx context.Context, from, to core.Currency) (value uint64,
 	return
 }
 
-func (r *Rate) cachedValue(key [2]core.Currency) (uint64, bool) {
+func (r *Rate) cachedValue(key [2]core.Currency) (float64, bool) {
 	r.mu.RLock()
 	cached, exists := r.cache[key]
 	r.mu.RUnlock()
@@ -52,13 +51,13 @@ func (r *Rate) cachedValue(key [2]core.Currency) (uint64, bool) {
 	return cached.Value, exists && time.Now().Before(cached.Expires)
 }
 
-func (r *Rate) cacheValue(key [2]core.Currency, value uint64) {
+func (r *Rate) cacheValue(key [2]core.Currency, value float64) {
 	r.mu.Lock()
 	r.cache[key] = internal.RateCacheEntry{Value: value, Expires: time.Now().Add(r.config.TTL)}
 	r.mu.Unlock()
 }
 
-func (r *Rate) fetch(ctx context.Context, from, to core.Currency) (value uint64, err error) {
+func (r *Rate) fetch(ctx context.Context, from, to core.Currency) (value float64, err error) {
 	requestCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 

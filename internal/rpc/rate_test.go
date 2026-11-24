@@ -29,7 +29,7 @@ func TestRateValue(t *testing.T) {
 		if count == 1 && pair == "USD/CNY" {
 			w.WriteHeader(http.StatusServiceUnavailable)
 		} else if pair == "USD/CNY" || pair == "CNY/USD" {
-			_, _ = fmt.Fprintf(w, `{"value":%d}`, 7_000_000+count)
+			_, _ = fmt.Fprintf(w, `{"value":%.6f}`, 1.234567+float64(count)/1_000_000)
 		} else {
 			t.Errorf("币种对错误：%s", pair)
 			w.WriteHeader(http.StatusBadRequest)
@@ -65,14 +65,14 @@ func TestRateValue(t *testing.T) {
 	}
 	for _, want := range []struct {
 		from, to core.Currency
-		value    uint64
+		value    float64
 	}{
-		{from: core.USD, to: core.CNY, value: 7_000_002},
-		{from: core.USD, to: core.CNY, value: 7_000_002},
-		{from: core.CNY, to: core.USD, value: 7_000_003},
+		{from: core.USD, to: core.CNY, value: 1.234569},
+		{from: core.USD, to: core.CNY, value: 1.234569},
+		{from: core.CNY, to: core.USD, value: 1.234570},
 	} {
 		if value, valueErr := rate.Value(ctx, want.from, want.to); valueErr != nil || value != want.value {
-			t.Fatalf("%s/%s：得到 %d, %v；期望 %d", want.from, want.to, value, valueErr, want.value)
+			t.Fatalf("%s/%s：得到 %f, %v；期望 %f", want.from, want.to, value, valueErr, want.value)
 		}
 	}
 
@@ -80,8 +80,8 @@ func TestRateValue(t *testing.T) {
 	if remaining := time.Until(rate.cache[key].Expires); remaining <= 0 || remaining > time.Hour {
 		t.Fatalf("缓存时长错误：%s", remaining)
 	}
-	rate.cache[key] = internal.RateCacheEntry{Value: 7_000_002, Expires: time.Now().Add(-time.Second)}
-	if value, valueErr := rate.Value(ctx, core.USD, core.CNY); valueErr != nil || value != 7_000_004 {
-		t.Fatalf("过期后应重新查询：得到 %d, %v", value, valueErr)
+	rate.cache[key] = internal.RateCacheEntry{Value: 1.234569, Expires: time.Now().Add(-time.Second)}
+	if value, valueErr := rate.Value(ctx, core.USD, core.CNY); valueErr != nil || value != 1.234571 {
+		t.Fatalf("过期后应重新查询：得到 %f, %v", value, valueErr)
 	}
 }
