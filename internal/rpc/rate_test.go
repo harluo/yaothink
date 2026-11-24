@@ -57,7 +57,7 @@ func TestRateValue(t *testing.T) {
 	}
 
 	ctx := t.Context()
-	if _, err = rate.Value(ctx, 0, core.CNY); err == nil || !strings.Contains(err.Error(), "无效的币种") {
+	if _, err = rate.Value(ctx, "", core.CNY); err == nil || !strings.Contains(err.Error(), "无效的币种") {
 		t.Fatalf("无效币种：%v", err)
 	}
 	if _, err = rate.Value(ctx, core.USD, core.CNY); err == nil || !strings.Contains(err.Error(), "汇率服务返回非成功状态") {

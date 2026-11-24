@@ -1,11 +1,23 @@
 package yaothink
 
 import (
+	"github.com/goexl/exception"
 	"github.com/harluo/yaothink/internal/core"
 )
 
 // 汇率服务支持的币种。
 type Currency = core.Currency
+
+// ParseCurrency 根据三字母币种代码创建币种，代码不区分大小写。
+func ParseCurrency(code string) (currency Currency, err error) {
+	if parsed, valid := core.ParseCurrency(code); valid {
+		currency = parsed
+	} else {
+		err = exception.New().Message("无效的币种代码").Build()
+	}
+
+	return
+}
 
 const (
 	AED = core.AED // 阿联酋迪拉姆
