@@ -1,3 +1,3 @@
 package internal
 
-const NameBilling = "billing"
+const NameWallet = "wallet"

@@ -22,7 +22,7 @@ type Wallet struct {
 
 func newWallet(client *grpc.Client, id id.Generator, logger log.Logger) *Wallet {
 	return &Wallet{
-		client: server.NewTokenApiClient(client.Connection(internal.NameBilling)),
+		client: server.NewTokenApiClient(client.Connection(internal.NameWallet)),
 		id:     id,
 		logger: logger,
 	}
