@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -17,7 +18,10 @@ import (
 )
 
 func TestRateValue(t *testing.T) {
-	const path = "/custom/rates"
+	const (
+		prefix = "/custom/rates/"
+		path   = "/custom/rates/parities/singles"
+	)
 	var requests atomic.Int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		count := requests.Add(1)
@@ -41,7 +45,13 @@ func TestRateValue(t *testing.T) {
 	if mkdirErr := os.Mkdir("config", 0o700); mkdirErr != nil {
 		t.Fatal(mkdirErr)
 	}
-	contents := fmt.Sprintf(`{"yaothink":{"rate":{"endpoint":%q,"ttl":"1h"}}}`, server.URL+path)
+	hostname, port, splitErr := net.SplitHostPort(server.Listener.Addr().String())
+	if splitErr != nil {
+		t.Fatal(splitErr)
+	}
+	contents := fmt.Sprintf(
+		`{"yaothink":{"rate":{"hostname":%q,"port":%s,"prefix":%q,"ttl":"1h"}}}`, hostname, port, prefix,
+	)
 	if writeErr := os.WriteFile("config/rate.jsonc", []byte(contents), 0o600); writeErr != nil {
 		t.Fatal(writeErr)
 	}
@@ -60,7 +70,8 @@ func TestRateValue(t *testing.T) {
 	if _, err = rate.Value(ctx, "", core.CNY); err == nil || !strings.Contains(err.Error(), "无效的币种") {
 		t.Fatalf("无效币种：%v", err)
 	}
-	if _, err = rate.Value(ctx, core.USD, core.CNY); err == nil || !strings.Contains(err.Error(), "汇率服务返回非成功状态") {
+	if _, err = rate.Value(ctx, core.USD, core.CNY); err == nil ||
+		!strings.Contains(err.Error(), "汇率服务返回非成功状态") {
 		t.Fatalf("服务错误：%v", err)
 	}
 	for _, want := range []struct {

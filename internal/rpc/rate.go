@@ -2,6 +2,10 @@ package rpc
 
 import (
 	"context"
+	"net"
+	"net/url"
+	"path"
+	"strconv"
 	"sync"
 	"time"
 
@@ -61,10 +65,15 @@ func (r *Rate) fetch(ctx context.Context, from, to core.Currency) (value float64
 	requestCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
+	endpoint := url.URL{
+		Scheme: "http",
+		Host:   net.JoinHostPort(r.config.Hostname, strconv.Itoa(r.config.Port)),
+		Path:   path.Join(r.config.Prefix, "parities/singles"),
+	}
 	result := new(internal.RateResponse)
 	request := r.client.R().SetContext(requestCtx).ForceContentType("application/json").SetResult(result).
 		SetQueryParam("from", from.String()).SetQueryParam("to", to.String())
-	if rsp, requestErr := request.Get(r.config.Endpoint); requestErr != nil {
+	if rsp, requestErr := request.Get(endpoint.String()); requestErr != nil {
 		err = requestErr
 	} else if rsp.StatusCode() != 200 {
 		err = exception.New().Message("汇率服务返回非成功状态").Field(field.New("status", rsp.Status())).Build()

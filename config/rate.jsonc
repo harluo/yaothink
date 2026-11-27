@@ -2,7 +2,9 @@
     "yaothink": {
         "rate": {
             // 汇率服务配置
-            "endpoint": "http://rate-server.service/api/private/parities/singles", // 完整的汇率查询接口地址
+            "hostname": "rate-server.service", // 主机名或 IP，不含协议和端口
+            "port": 80, // HTTP 端口
+            "prefix": "/api/private", // 接口路径前缀，不含固定的 /parities/singles
             "ttl": "24h", // 汇率缓存时长，必须大于零
         },
     },

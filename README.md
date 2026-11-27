@@ -15,7 +15,9 @@
 ## 查询汇率
 
 在应用的 `config/rate.jsonc` 中通过 `yaothink.rate` 配置汇率服务（见[示例](config/rate.jsonc)）。
-`yaothink.rate.endpoint` 默认是 `http://rate-server.service/api/private/parities/singles`，自定义时请填写完整的 HTTP(S) 接口地址；
+`yaothink.rate` 的 `hostname`、`port` 和 `prefix` 分别默认是 `rate-server.service`、`80` 和 `/api/private`。
+客户端使用 HTTP，并在路径前缀后追加固定的 `/parities/singles`，默认请求地址为
+`http://rate-server.service:80/api/private/parities/singles`。如已配置旧的 `endpoint`，请改用这三个字段。
 `yaothink.rate.ttl` 默认是 `24h`（1 天），必须大于零。
 
 在业务组件的构造函数中注入 `*yaothink.Rate`，然后调用 `rate.Value(ctx, yaothink.USD, yaothink.CNY)`。
